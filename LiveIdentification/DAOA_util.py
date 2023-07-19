@@ -21,7 +21,7 @@ else:
 
 # set to evaluation mode
 DAOA_model = torch.load(
-    './saved_models/digit_area_orientation_alignment.pkl')
+    './saved_models/new_digit_area_orientation_alignment_99.pkl')
 DAOA_model.eval()
 CLASS_NAMES = ['__background__', 'not bar', 'bar']
 device = torch.device(

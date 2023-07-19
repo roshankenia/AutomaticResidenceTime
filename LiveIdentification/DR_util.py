@@ -24,7 +24,7 @@ device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 digit_detection_model = torch.load(
-    r'./saved_models/digit_recognition.pkl')
+    r'./saved_models/newest_digit_recognition_100.pkl')
 digit_detection_model.to(device)
 digit_detection_model.eval()
 

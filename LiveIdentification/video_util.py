@@ -19,6 +19,14 @@ else:
 c = 7000
 
 
+# constant variables for timings to subtract from residence time to get exact time
+avgTimeAugerToColumnInlet = np.mean([3.28, 3.29, 3.16])
+print('avgTimeAugerToColumnInlet:', avgTimeAugerToColumnInlet)
+avgTimeColumnExitToAuger = np.mean([10.57, 10.95, 11.08])
+print('avgTimeColumnExitToAuger:', avgTimeColumnExitToAuger)
+
+
+
 def save_frame_and_mask(frame):
     folder = f"./FrameFolder/"
     if not os.path.isdir(folder):
@@ -41,6 +49,26 @@ def save_frame_and_mask(frame):
     cv2.imwrite(mask_folder + "frame_" + str(c) + ".jpg", mask)
 
     c += 1
+
+
+def square_and_resize(img, resize):
+    ch, cw = img.shape[:2]
+    imgSize = max(ch, cw)
+
+    # create background
+    background = np.zeros((imgSize, imgSize, 3), np.uint8)
+
+    # compute xoff and yoff for placement of upper left corner of resized image
+    yoff = round((imgSize-ch)/2)
+    xoff = round((imgSize-cw)/2)
+
+    # place crop in image
+    background[yoff:yoff+ch, xoff:xoff+cw] = img
+
+    # resize digitCrop
+    background = cv2.resize(background, (resize, resize))
+
+    return background
 
 
 class Video():
@@ -96,7 +124,8 @@ class Video():
                     outletTime = finalTime
                     inletTime = inletPebbles[found][1]
 
-                    residenceTime = outletTime - inletTime
+                    residenceTime = outletTime - inletTime - \
+                        avgTimeAugerToColumnInlet - avgTimeColumnExitToAuger
 
                     print('Pebble', finalIdent,
                           'had a residence time of:', residenceTime)
@@ -140,8 +169,10 @@ class Video():
             if not self.activePebble.isConverged:
                 # save orientation bar prediction
                 for i in range(len(pebbleDigitsCrops)):
+                    resizedDigitCrop = square_and_resize(
+                        pebbleDigitsCrops[i], 750)
                     annImg, fixedImages = digit_area_orientation_alignment(
-                        pebbleDigitsCrops[i], originalDigitCrops[i], 0.75)
+                        resizedDigitCrop, originalDigitCrops[i])
                     cv2.imwrite(os.path.join(self.imgFolder, "DAOA_" +
                                 str(frameNumber) + "_pred_"+str(i)+".jpg"), annImg)
                     for f in range(len(fixedImages)):

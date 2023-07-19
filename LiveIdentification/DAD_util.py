@@ -17,6 +17,9 @@ if not torch.cuda.is_available() or torch.cuda.device_count() != 1:
     sys.exit()
 else:
     print('GPU is being properly used')
+# utils transforms, engine are the utils.py, transforms.py, engine.py under this fold
+
+# %matplotlib inline
 
 
 device = torch.device(
